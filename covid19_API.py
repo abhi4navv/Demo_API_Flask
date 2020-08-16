@@ -87,7 +87,7 @@ class Analytics:
         return dct_data_set
 
 
-@app.route('/', methods = ['POST'] )
+@app.route('/',  methods=['GET', 'POST']    )
 def product_info():
     prd = Analytics(request)
     ret_json = prd.create_dataset()
