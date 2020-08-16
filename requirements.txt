@@ -23,7 +23,6 @@ itsdangerous==1.1.0
 jdcal==1.4.1
 Jinja2==2.11.2
 keyring==18.0.1
-language-selector==0.1
 launchpadlib==1.10.13
 lazr.restfulclient==0.14.2
 lazr.uri==1.0.3
