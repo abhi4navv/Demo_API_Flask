@@ -1,1 +1,1 @@
-web: gunicorn --bind 0.0.0.0:$PORT covid19_API:app
+web: gunicorn --bind 0.0.0.0:$PORT covid19_API:app --preload --workers 1
