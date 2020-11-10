@@ -38,6 +38,8 @@ class Analytics:
 
     def get_main_stats(self, df_main_ordered_top15):
         recoveryrate = {}
+        confirmed_data = {'totalconfirmed': '', 'confirmed_max_date': ''}
+        detailed_data = {'totalrecovered': '', 'totaldeceased': ''}
         dct_data = {}
         try:
             max_index = df_main_ordered_top15[df_main_ordered_top15.date == df_main_ordered_top15.date.max()].index
@@ -45,6 +47,11 @@ class Analytics:
             recoveryrate['rate'] = round((int(df_main_ordered_top15.loc[max_index]['totalrecovered']) / int(
                 df_main_ordered_top15.loc[max_index]['totalconfirmed'])) * 100, 2)
 
+            confirmed_data['totalconfirmed'] = int(df_main_ordered_top15.loc[max_index]['totalconfirmed'])
+            confirmed_data['confirmed_max_date'] = df_main_ordered_top15.loc[max_index]['date'].values[0]
+            detailed_data['totalrecovered'] = int(df_main_ordered_top15.loc[max_index]['totalrecovered'])
+            detailed_data['totaldeceased'] = int(df_main_ordered_top15.loc[max_index]['totaldeceased'])
+            print(df_main_ordered_top15.loc[max_index])
         except:
             recoveryrate = 'N/A'
 
@@ -55,7 +62,11 @@ class Analytics:
             dct['case_confirmed'] = list(df_main_ordered_top15.dailyconfirmed.values)
             dct['deaths'] = list(df_main_ordered_top15.dailydeceased.values)
             dct['recovery_rate'] = recoveryrate
+            dct['confirmed_data'] = confirmed_data
+            dct['Detailed_data'] = detailed_data
             dct_data['main_data'] = dct
+
+
         except:
             dct_data = {}
 
@@ -72,6 +83,7 @@ class Analytics:
             dct_data_set = self.get_main_stats(df_main_ordered_top15)
         # State wise dataset
 
+
         df_state_wise = pd.DataFrame()
         if json_data.status_code == 200 and bool(json_data.content) == True:
             if 'statewise' in json.loads(json_data.content):
@@ -87,7 +99,7 @@ class Analytics:
         return dct_data_set
 
 
-@app.route('/',  methods=['GET', 'POST']    )
+@app.route('/',  methods=['GET', 'POST'])
 def product_info():
     prd = Analytics(request)
     ret_json = prd.create_dataset()
