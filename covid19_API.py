@@ -1,7 +1,7 @@
 import calendar
 
 from flask import Flask, request, make_response
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 import json
 
@@ -101,11 +101,12 @@ class Analytics:
 
 
 @app.route('/',  methods=['GET', 'POST'])
+@cross_origin(supports_credentials=True)
 def product_info():
     prd = Analytics(request)
     ret_json = prd.create_dataset()
     return ret_json
 
 if __name__ == '__main__':
-    CORS(app)
+    CORS(app, support_credentials=True)
     app.run(debug=True)
