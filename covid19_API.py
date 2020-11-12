@@ -26,10 +26,13 @@ class Analytics:
         url = 'https://api.covid19india.org/data.json'
         json_data = requests.get(url)
         df_main = pd.DataFrame()
+
         if json_data.status_code == 200 and bool(json_data.content) == True:
             if 'cases_time_series' in json.loads(json_data.content):
                 main_data = json.loads(json_data.content)
                 df_main = pd.DataFrame(main_data['cases_time_series'])
+
+
         df_main.replace({np.nan, 0}, inplace=True)
         month_number_word_json = {v: k for k, v in enumerate(calendar.month_abbr)}
         del month_number_word_json['']
@@ -52,7 +55,7 @@ class Analytics:
             confirmed_data['confirmed_max_date'] = df_main_ordered_top15.loc[max_index]['date'].values[0]
             detailed_data['totalrecovered'] = int(df_main_ordered_top15.loc[max_index]['totalrecovered'])
             detailed_data['totaldeceased'] = int(df_main_ordered_top15.loc[max_index]['totaldeceased'])
-            print(df_main_ordered_top15.loc[max_index])
+            #print(df_main_ordered_top15.loc[max_index])
         except:
             recoveryrate = 'N/A'
 
@@ -75,9 +78,9 @@ class Analytics:
 
 
     def create_dataset(self):
-        dct_data_state = {}
-        
+        state_names = ['Andaman and Nicobar Islands', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chandigarh', 'Chhattisgarh', ' Daman and Diu', 'Delhi', 'Dadra and Nagar Haveli', 'Goa', 'Gujarat', 'Himachal Pradesh', 'Haryana', 'Jharkhand', 'Ladakh', 'Karnataka', 'Kerala', 'Lakshadweep', 'Maharashtra', 'Meghalaya', 'Manipur', 'Madhya Pradesh', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Puducherry', 'Rajasthan', 'Sikkim', 'Telangana', 'Tamil Nadu', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Jammu and Kashmir']
         df_main_data, json_data = self.get_master_data()
+        state_data = []
         if df_main_data.empty == False:
             df_main_ordered = df_main_data.sort_values(by='date', ascending=False)
             df_main_ordered_top15 = df_main_ordered[:15]
@@ -89,6 +92,19 @@ class Analytics:
         if json_data.status_code == 200 and bool(json_data.content) == True:
             if 'statewise' in json.loads(json_data.content):
                 df_state_wise = json.loads(json_data.content)
+                #dct_data_set['statewise'] = df_state_wise['statewise']
+                for dt in state_names:
+                    for states in df_state_wise['statewise']:
+                        if dt.lower() == states['state'].lower():
+                            states.pop('statecode', None)
+                            if 'statenotes' in states:
+                                if states['statenotes'] == "":
+                                    states.pop('statenotes', None)
+
+                            state_data.append({dt.lower(): states})
+
+
+                dct_data_set['statewise'] = state_data
                 df_state_wise = pd.DataFrame(df_state_wise['statewise'])
 
 
@@ -96,7 +112,7 @@ class Analytics:
             if df_state_wise.shape[0] > 20:
                 df_state_wise_top15 = df_state_wise.iloc[:20]
 
-        dct_data_set['State_Name'] = ['Andaman and Nicobar Islands', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chandigarh', 'Chhattisgarh', ' Daman and Diu', 'Delhi', 'Dadra and Nagar Haveli', 'Goa', 'Gujarat', 'Himachal Pradesh', 'Haryana', 'Jharkhand', 'Ladakh', 'Karnataka', 'Kerala', 'Lakshadweep', 'Maharashtra', 'Meghalaya', 'Manipur', 'Madhya Pradesh', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Puducherry', 'Rajasthan', 'Sikkim', 'Telangana', 'Tamil Nadu', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Jammu and Kashmir']
+        dct_data_set['State_Name'] = state_names
         return dct_data_set
 
 
